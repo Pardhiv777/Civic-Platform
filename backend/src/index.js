@@ -11,41 +11,86 @@ connectDB();
 
 const app = express();
 
-// Middleware
+/* =========================
+   CORS CONFIG (FIXED)
+========================= */
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://civic-platform-frontend.vercel.app' // 👈 REPLACE THIS IF YOUR URL IS DIFFERENT
+];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://your-frontend-domain.com']
-    : ['http://localhost:5173', 'http://localhost:3000'],
+  origin: function (origin, callback) {
+    // allow requests with no origin (like Postman or server-to-server)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Blocked by CORS: Not allowed origin'));
+    }
+  },
   credentials: true,
 }));
+
+/* =========================
+   MIDDLEWARE
+========================= */
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
+/* =========================
+   HEALTH CHECK
+========================= */
+
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// API Routes
+/* =========================
+   ROUTES
+========================= */
+
 app.use('/api/auth', authRoutes);
 app.use('/api/issues', issueRoutes);
 
-// 404 handler
+/* =========================
+   404 HANDLER
+========================= */
+
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.originalUrl} not found`,
+  });
 });
 
-// Global error handler
+/* =========================
+   GLOBAL ERROR HANDLER
+========================= */
+
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('❌ Error:', err.message);
+
   res.status(err.statusCode || 500).json({
     success: false,
     message: err.message || 'Internal Server Error',
   });
 });
 
+/* =========================
+   START SERVER
+========================= */
+
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
