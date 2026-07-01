@@ -18,7 +18,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://civic-platform-frontend.vercel.app' // 👈 REPLACE THIS IF YOUR URL IS DIFFERENT
+  'https://civic-platform-wtug.vercel.app'
 ];
 
 app.use(cors({
