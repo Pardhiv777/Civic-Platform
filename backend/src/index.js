@@ -52,6 +52,12 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+app.get('/test', (req, res) => {
+  res.json({
+    message: "THIS IS THE NEW BACKEND",
+    version: "1.0"
+  });
+});
 
 /* =========================
    ROUTES
